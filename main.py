@@ -5,6 +5,7 @@ import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import FFmpegPCMAudio
+import asyncio
 
 # Load environment variables
 load_dotenv("pyBot.env")
@@ -32,7 +33,7 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     print(f'{member} has connected to {channel}!')
-    await channel.send(f'Welcome to {GUILD} {member}!')
+    await channel.send(f'Welcome to {GUILD}, {member}!')
 
 
 @bot.event
@@ -43,7 +44,7 @@ async def on_voice_state_update(member, before, after):
         await before.channel.send(f'Good bye {member}!')
 
     # Check if member joined
-    elif before.channel is None and after.channel is not None:
+    elif before.channel is not after.channel and after.channel is not None:
         if member.id != 1202796878736007178:
             print(f'{member} has joined the voice Channel {after.channel}!')
             await after.channel.send(f'Welcome to {after.channel}, {member}!')
@@ -53,9 +54,13 @@ async def on_voice_state_update(member, before, after):
             else:
                 source = FFmpegPCMAudio('quick_fart_x.wav')
             vc.play(source)
+            await timeout(vc)
         else:
             return
 
+async def timeout(VoiceClient):
+    await asyncio.sleep(5)
+    await VoiceClient.disconnect()
 
 # bot commands
 @bot.command(name="Hello!", help="Say Hello!")

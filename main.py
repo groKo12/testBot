@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 import asyncio
+import json
+import random
 
 # Load environment variables
 load_dotenv("pyBot.env")
@@ -13,6 +15,10 @@ TOKEN = os.getenv('DISCORD_KEY')
 GUILD = os.getenv('DISCORD_SERVER')
 CHANNEL1 = os.getenv('CHANNEL_ID')
 
+# load in audio file variables
+f = open('Sound.json')
+sounds = json.load(f)
+print(f'{sounds}')
 # set intents variable that is called in 'bot'
 intents = discord.Intents.default()
 intents.members = True
@@ -39,9 +45,14 @@ async def on_member_join(member):
 @bot.event
 async def on_voice_state_update(member, before, after):
     # Check if member left
-    if before.channel is not None and after.channel is None:
-        print(f'{member} has left the voice Channel {before.channel}!')
-        await before.channel.send(f'Good bye {member}!')
+    if before.channel is not None and after.channel is not before.channel:
+        if member.id != 1202796878736007178:
+            print(f'{member} has left the voice Channel {before.channel}!')
+            await before.channel.send(f'Good bye {member}!')
+            vc = await before.channel.connect()
+            source = FFmpegPCMAudio('boo-36556.mp3')
+            vc.play(source)
+            await timeout(vc)
 
     # Check if member joined
     elif before.channel is not after.channel and after.channel is not None:
@@ -49,10 +60,9 @@ async def on_voice_state_update(member, before, after):
             print(f'{member} has joined the voice Channel {after.channel}!')
             await after.channel.send(f'Welcome to {after.channel}, {member}!')
             vc = await after.channel.connect()
-            if member.id == 1007476212253331476:
-                source = FFmpegPCMAudio('air_raid.wav')
-            else:
-                source = FFmpegPCMAudio('quick_fart_x.wav')
+            rand = random.choice(sounds)
+            source = FFmpegPCMAudio(rand)
+            print(f'rand')
             vc.play(source)
             await timeout(vc)
         else:

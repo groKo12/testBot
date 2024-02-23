@@ -1,13 +1,11 @@
 # bot.py
 import os
-
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 import asyncio
-import json
-import random
+import Audio_files
 
 # Load environment variables
 load_dotenv("pyBot.env")
@@ -15,10 +13,6 @@ TOKEN = os.getenv('DISCORD_KEY')
 GUILD = os.getenv('DISCORD_SERVER')
 CHANNEL1 = os.getenv('CHANNEL_ID')
 
-# load in audio file variables
-f = open('Sound.json')
-sounds = json.load(f)
-print(f'{sounds}')
 # set intents variable that is called in 'bot'
 intents = discord.Intents.default()
 intents.members = True
@@ -60,9 +54,7 @@ async def on_voice_state_update(member, before, after):
             print(f'{member} has joined the voice Channel {after.channel}!')
             await after.channel.send(f'Welcome to {after.channel}, {member}!')
             vc = await after.channel.connect()
-            rand = random.choice(sounds)
-            source = FFmpegPCMAudio(rand)
-            print(f'rand')
+            source = FFmpegPCMAudio(Audio_files.rand_sound())
             vc.play(source)
             await timeout(vc)
         else:

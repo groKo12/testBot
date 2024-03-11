@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord import FFmpegPCMAudio
 from Audio_files import rand_sound
 from Logger import write_to_log
+from Ollama_Interface import ask
 
 # Load environment variables
 load_dotenv("pyBot.env")
@@ -89,5 +90,10 @@ async def greeting(ctx):
     response = "Hi!"
     await ctx.send(response)
 
+@bot.command(name="?", help="Ask LLaMa2 a question!")
+async def ask_ollama(ctx, *args):
+    ask_string = ' '.join(args)
+    print(ask_string)
+    await ctx.send(ask(ask_string))
 
 bot.run(TOKEN)

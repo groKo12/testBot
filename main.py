@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord import FFmpegPCMAudio
 from Audio_files import rand_sound
 from Logger import write_to_log
-from Ollama_Interface import ask
+from Ollama_Interface import ask, question
 
 # Load environment variables
 load_dotenv("pyBot.env")
@@ -84,16 +84,43 @@ async def timeout(VoiceClient):
     await asyncio.sleep(5)
     await VoiceClient.disconnect()
 
+def text_splitter(input_str, chunk_size):
+    return [input_str[i:i + chunk_size] for i in range(0, len(input_str), chunk_size)]
+
 # bot commands
 @bot.command(name="Hello!", help="Say Hello!")
 async def greeting(ctx):
     response = "Hi!"
     await ctx.send(response)
 
-@bot.command(name="?", help="Ask LLaMa2 a question!")
+@bot.command(name="?", help="Ask LLaMa2 a question from a personalized knowledgebase!")
+async def ask_Kollama(ctx, *args):
+    ask_string = ' '.join(args)
+    print(ask_string)
+    await ctx.send("------AI Response Incoming------")
+    response = str(ask(ask_string))
+    print(len(response))
+    if len(response) > 2000:
+        chunk_arr = text_splitter(response, 1900)
+        print("chunking")
+        for chunks in chunk_arr:
+            await ctx.send(chunks)
+    else:
+        await ctx.send(response)
+
+@bot.command(name="!", help="Ask LLaMa2 a question!")
 async def ask_ollama(ctx, *args):
     ask_string = ' '.join(args)
     print(ask_string)
-    await ctx.send(ask(ask_string))
+    await ctx.send("------AI Response Incoming------")
+    response = str(question(ask_string))
+    print(len(response))
+    if len(response) > 2000:
+        chunk_arr = text_splitter(response,1900)
+        print("chunking")
+        for chunks in chunk_arr:
+            await ctx.send(chunks)
+    else:
+        await ctx.send(response)
 
 bot.run(TOKEN)

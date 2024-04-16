@@ -61,6 +61,7 @@ async def on_voice_state_update(member, before, after):
 
     # Check if member joined
     elif before.channel is not after.channel and after.channel is not None:
+        # Check if the ID is the bot
         if member.id != 1202796878736007178:
 
             # Log Member joining
@@ -71,7 +72,7 @@ async def on_voice_state_update(member, before, after):
             # Send welcome message
             await after.channel.send(f'Welcome to {after.channel}, {member}!')
 
-            # Play random welcom sound
+            # Play random welcome sound
             vc = await after.channel.connect()
             source = FFmpegPCMAudio(rand_sound())
             vc.play(source)
@@ -80,47 +81,64 @@ async def on_voice_state_update(member, before, after):
         else:
             return
 
+# disconnect the bot from a voice channel after a period of time
 async def timeout(VoiceClient):
     await asyncio.sleep(5)
     await VoiceClient.disconnect()
 
+# Split bot response text so it doesn't exceed the discord API 2000 char limit.
 def text_splitter(input_str, chunk_size):
     return [input_str[i:i + chunk_size] for i in range(0, len(input_str), chunk_size)]
 
-# bot commands
+#  -------- bot commands --------
 @bot.command(name="Hello!", help="Say Hello!")
 async def greeting(ctx):
     response = "Hi!"
     await ctx.send(response)
 
-@bot.command(name="?", help="Ask LLaMa2 a question from a personalized knowledgebase!")
+@bot.command(name="?", help="Ask LLaMA2 a question from a personalized knowledgebase!")
 async def ask_Kollama(ctx, *args):
+
+    # Join multiple args as one string of text
     ask_string = ' '.join(args)
     print(ask_string)
+
+    # Notify users a response is incoming and may take some time based off of system specs
     await ctx.send("------AI Response Incoming------")
+
+    # Send user question to AI
     response = str(ask(ask_string))
-    print(len(response))
+
+    # Discord API errors on responses larger than 2000 char.
+    # Break up chars into chunks less than 2000 char and send to server
     if len(response) > 2000:
         chunk_arr = text_splitter(response, 1900)
-        print("chunking")
+        print("chunking...")
         for chunks in chunk_arr:
             await ctx.send(chunks)
     else:
         await ctx.send(response)
 
-@bot.command(name="!", help="Ask LLaMa2 a question!")
+@bot.command(name="!", help="Ask LLaMA2 a question!")
 async def ask_ollama(ctx, *args):
+
+    # Join multiple args as one string of text
     ask_string = ' '.join(args)
     print(ask_string)
+
+    # Notify users a response is incoming and may take some time based off of system specs
     await ctx.send("------AI Response Incoming------")
+
+    # Send user question to AI
     response = str(question(ask_string))
-    print(len(response))
+
+    # Discord API errors on responses larger than 2000 char.
+    # Break up chars into chunks less than 2000 char and send to server
     if len(response) > 2000:
-        chunk_arr = text_splitter(response,1900)
-        print("chunking")
+        chunk_arr = text_splitter(response, 1900)
+        print("chunking...")
         for chunks in chunk_arr:
             await ctx.send(chunks)
     else:
         await ctx.send(response)
-
 bot.run(TOKEN)

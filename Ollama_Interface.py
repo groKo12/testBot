@@ -24,11 +24,13 @@ index = VectorStoreIndex.from_documents(
   show_progress=True
 )
 
+# ask bot a question with the knowledgebase
 def ask(user_string):
   query_engine = index.as_query_engine(llm=Settings.llm)
   response = query_engine.query(user_string)
   return response
 
+# Ask bot a question without utilizing the knowledgebase
 def question(user_string):
   message = [ChatMessage(role = "user", content = f"{user_string}")]
   response = Settings.llm.chat(messages=message)
